@@ -218,7 +218,7 @@ st.subheader("Votos por eixo")
 
 votos_eixo = df_propostas.groupby('categoria/nome/pt-BR')['quantidade_votos'].sum().reset_index()
 fig1 = px.bar(
-    votos_eixo.sort_values('id_proposta').tail(10),
+    votos_eixo.sort_values('quantidade_votos').tail(10),
     y="categoria/nome/pt-BR",
     x="quantidade_votos",
     orientation="h",
