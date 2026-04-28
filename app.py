@@ -213,7 +213,7 @@ fig1.update_traces(textposition="outside")
 st.plotly_chart(fig1, use_container_width=True)
 
 # 🔹 Votos por eixo
-votos_eixo = df_propostas.groupby('categoria/nome')['id'].count().reset_index()
+votos_eixo = df_propostas.groupby('categoria/nome/pt-BR')['id'].count().reset_index()
 st.subheader("Votos por eixo")
 
 fig1 = px.bar(
