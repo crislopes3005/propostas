@@ -158,8 +158,8 @@ pct_mais100 = mais_de_100 / total
 col1, col2, col3 = st.columns(3)
 
 col1.metric("Sem votos", f"{pct_sem:.0%}")
-col2.metric("1 a 100 votos", f"{pct_ate5:.0%}")
-col3.metric("Mais de 100 votos", f"{pct_mais5:.0%}")
+col2.metric("1 a 100 votos", f"{pct_ate100:.0%}")
+col3.metric("Mais de 100 votos", f"{pct_mais100:.0%}")
 
 # =========================
 # GRÁFICOS
@@ -329,7 +329,7 @@ st.plotly_chart(fig5, use_container_width=True)
 # =========================
 st.subheader("Detalhamento das propostas")
 
-df_tabela = df_propostas[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos' 'url_proposta']].copy()
+df_tabela = df_propostas[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos', 'url_proposta']].copy()
 df_tabela = df_tabela.sort_values('quantidade_votos', ascending=False).head(20)
 
 df_tabela['🔗'] = df_tabela['url_proposta'].apply(
