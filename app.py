@@ -147,13 +147,13 @@ ate_100 = (
     (df_propostas['quantidade_votos'] <= 100)
 ).sum()
 
-mais_de_5 = (df_propostas['quantidade_votos'] > 100).sum()
+mais_de_100 = (df_propostas['quantidade_votos'] > 100).sum()
 
 total = len(df_propostas)
 
 pct_sem = sem_votos / total
-pct_ate5 = ate_100 / total
-pct_mais5 = mais_de_100 / total
+pct_ate100 = ate_100 / total
+pct_mais100 = mais_de_100 / total
 
 col1, col2, col3 = st.columns(3)
 
