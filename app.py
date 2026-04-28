@@ -232,11 +232,11 @@ st.plotly_chart(fig1, use_container_width=True)
 # 🔹 Propostas por dia
 st.subheader("Propostas por dia")
 
-propostas_dia = df_propostas.groupby('data')['id'].count().reset_index()
+propostas_dia = df_propostas.groupby('data_publicacao')['id'].count().reset_index()
 
 fig2 = px.line(
-    propostas_dia.sort_values('data'),
-    x='data',
+    propostas_dia.sort_values('data_publicacao'),
+    x='data_publicacao',
     y='id',
     markers=True,
     text='id',
