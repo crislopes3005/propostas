@@ -45,7 +45,7 @@ df_comentarios['data_publicacao'] = pd.to_datetime(
 df_comentarios['data'] = df_comentarios['data_publicacao'].dt.date
 df_pordia['Date'] = pd.to_datetime(df_pordia['Date'], dayfirst=True)
 
-# Datas
+# Datas - proposta
 df_propostas['data_publicacao'] = pd.to_datetime(
     df_propostas['data_publicacao'],
     format='%d/%m/%Y %H:%M',
@@ -53,7 +53,7 @@ df_propostas['data_publicacao'] = pd.to_datetime(
 )
 
 df_propostas['data'] = df_propostas['data_publicacao'].dt.date
-df_pordia['Date'] = pd.to_datetime(df_pordia['Date'], dayfirst=True)
+
 
 # Descrição curta
 df_propostas['descricao_curta'] = df_propostas['descricao'].apply(
@@ -232,11 +232,11 @@ st.plotly_chart(fig1, use_container_width=True)
 # 🔹 Propostas por dia
 st.subheader("Propostas por dia")
 
-propostas_dia = df_propostas.groupby('data_publicacao')['id_proposta'].count().reset_index()
+propostas_dia = df_propostas.groupby('data')['id_proposta'].count().reset_index()
 
 fig2 = px.line(
-    propostas_dia.sort_values('data_publicacao'),
-    x='data_publicacao',
+    propostas_dia.sort_values('data'),
+    x='data',
     y='id_proposta',
     markers=True,
     text='id_proposta',
