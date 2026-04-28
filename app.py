@@ -317,20 +317,22 @@ st.plotly_chart(fig5, use_container_width=True)
 # =========================
 # TABELA FINAL
 # =========================
-st.subheader("Detalhamento dos parágrafos")
+st.subheader("Detalhamento das propostas")
 
-df_tabela = df_paragrafos[['descricao_curta', 'quantidade_comentarios', 'url_proposta']].copy()
-df_tabela = df_tabela.sort_values('quantidade_comentarios', ascending=False).head(20)
+df_tabela = df_propostas[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos' 'url_proposta']].copy()
+df_tabela = df_tabela.sort_values('quantidade_votos', ascending=False).head(20)
 
 df_tabela['🔗'] = df_tabela['url_proposta'].apply(
     lambda x: f'<a href="{x}" target="_blank">🔗</a>'
 )
 
 st.markdown(
-    df_tabela[['descricao_curta', 'quantidade_comentarios', '🔗']]
+    df_tabela[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos' ,'🔗']]
     .rename(columns={
         'descricao_curta': 'Descrição',
-        'quantidade_comentarios': 'Comentários'
+        'quantidade_comentarios': 'Comentários',
+        'categoria/nome':'Eixo',
+        'quantidade_votos':'Votos'
     })
     .to_html(escape=False, index=False),
     unsafe_allow_html=True
@@ -342,6 +344,61 @@ st.markdown(
 st.subheader("Nuvem de palavras dos comentários")
 
 texto = " ".join(df_comentarios['texto'].dropna().astype(str))
+
+stopwords = set(STOPWORDS)
+stopwords = set(STOPWORDS)
+
+stopwords.update([
+    # artigos
+    "o", "a", "os", "as", "um", "uma", "uns", "umas",
+
+    # preposições
+    "de", "da", "do", "das", "dos",
+    "em", "no", "na", "nos", "nas",
+    "para", "por", "com", "sem",
+    "sob", "sobre", "entre", "até",
+    "desde", "contra", "perante",
+    "ante", "após", "trás",
+
+    # contrações comuns
+    "ao", "aos", "à", "às",
+    "pelo", "pela", "pelos", "pelas",
+    "num", "numa", "nuns", "numas",
+    "dum", "duma", "duns", "dumas",
+
+    # pronomes e conectivos (melhora muito a nuvem)
+    "que", "se", "isso", "isto", "aquele", "aquela",
+    "ele", "ela", "eles", "elas",
+    "me", "te", "lhe", "nos", "vos",
+    "eu", "tu", "você", "vocês",
+    "nós", "eles", "elas",
+    "qual", "quais", "quem",
+    "onde", "quando", "como",
+
+    # conectores muito comuns
+    "e", "ou", "mas", "porque", "pois", "logo",
+    "também", "já", "ainda", "muito", "mais",
+    "menos", "tudo", "todos", "todas"
+])
+
+wordcloud = WordCloud(
+    width=800,
+    height=400,
+    background_color='white',
+    colormap='Blues',
+    stopwords=stopwords
+).generate(texto)
+
+fig, ax = plt.subplots()
+ax.imshow(wordcloud, interpolation='bilinear')
+ax.axis("off")
+
+# =========================
+# NUVEM DE PALAVRAS - propostas
+# =========================
+st.subheader("Nuvem de palavras das propostas")
+
+texto = " ".join(df_propostas['descricao'].dropna().astype(str))
 
 stopwords = set(STOPWORDS)
 stopwords = set(STOPWORDS)
