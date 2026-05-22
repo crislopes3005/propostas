@@ -165,12 +165,12 @@ col3.metric("Mais de 100 votos", f"{pct_mais100:.0%}")
 # GRÁFICOS
 # =========================
 # 🔹 propostas por eixo
-st.subheader("Comentários por eixo")
-comentarios_eixo = df_propostas.groupby('categoria/id')['id'].nunique().reset_index()
+st.subheader("Propostas por eixo")
+comentarios_eixo = df_propostas.groupby('categoria/id')['id_proposta'].nunique().reset_index()
 fig1 = px.bar(
-    comentarios_eixo.sort_values('id').tail(10),
+    comentarios_eixo.sort_values('id_proposta').tail(10),
     y="categoria/id",
-    x="id",
+    x="id_proposta",
     orientation="h",
     text="quantidade_propostas",
     color_discrete_sequence=[COR_PRINCIPAL]
