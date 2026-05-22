@@ -330,7 +330,7 @@ st.plotly_chart(fig5, use_container_width=True)
 # =========================
 st.subheader("Detalhamento das propostas")
 
-df_tabela = df_propostas[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos', 'url_proposta']].copy()
+df_tabela = df_propostas[['titulo', 'quantidade_comentarios', 'categoria/nome/pt-BR', 'quantidade_votos', 'url_proposta']].copy()
 df_tabela = df_tabela.sort_values('quantidade_votos', ascending=False).head(20)
 
 df_tabela['🔗'] = df_tabela['url_proposta'].apply(
@@ -338,7 +338,7 @@ df_tabela['🔗'] = df_tabela['url_proposta'].apply(
 )
 
 st.markdown(
-    df_tabela[['titulo', 'quantidade_comentarios', 'categoria/nome', 'quantidade_votos' ,'🔗']]
+    df_tabela[['titulo', 'quantidade_comentarios', 'categoria/nome/pt-BR', 'quantidade_votos' ,'🔗']]
     .rename(columns={
         'descricao_curta': 'Descrição',
         'quantidade_comentarios': 'Comentários',
