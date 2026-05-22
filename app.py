@@ -214,7 +214,7 @@ st.plotly_chart(fig2, use_container_width=True)
 # 🔹 Votos por proposta
 st.subheader("Votos por proposta")
 
-fig1 = px.bar(
+fig3 = px.bar(
     df_propostas.sort_values('quantidade_votos').tail(10),
     y="titulo",
     x="quantidade_votos",
@@ -223,15 +223,16 @@ fig1 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig1.update_traces(textposition="outside")
-st.plotly_chart(fig1, use_container_width=True)
+fig3.update_traces(textposition="outside")
+st.plotly_chart(fig3, use_container_width=True)
 
 # 🔹 Votos por eixo
 
 st.subheader("Votos por eixo")
 
 votos_eixo = df_propostas.groupby('categoria/id')['quantidade_votos'].sum().reset_index()
-fig1 = px.bar(
+
+fig4 = px.bar(
     votos_eixo.sort_values('quantidade_votos').tail(10),
     y="categoria/nome/pt-BR",
     x="quantidade_votos",
@@ -240,8 +241,8 @@ fig1 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig1.update_traces(textposition="outside")
-st.plotly_chart(fig1, use_container_width=True)
+fig4.update_traces(textposition="outside")
+st.plotly_chart(fig4, use_container_width=True)
 
 # 🔹 Propostas por dia
 st.subheader("Propostas por dia")
