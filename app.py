@@ -234,7 +234,7 @@ votos_eixo = df_propostas.groupby('categoria/id')['quantidade_votos'].sum().rese
 
 fig4 = px.bar(
     votos_eixo.sort_values('quantidade_votos').tail(10),
-    y="categoria/nome/pt-BR",
+    y="categoria/id",
     x="quantidade_votos",
     orientation="h",
     text="quantidade_votos",
