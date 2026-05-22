@@ -165,12 +165,24 @@ col3.metric("Mais de 100 votos", f"{pct_mais100:.0%}")
 # GRÁFICOS
 # =========================
 
-# 🔹 Comentários por parágrafo
-st.subheader("Comentários por parágrafo")
+# 🔹 Comentários por proposta
+st.subheader("Comentários por proposta")
 
 fig1 = px.bar(
     df_propostas.sort_values('quantidade_comentarios').tail(10),
     y="titulo",
+    x="quantidade_comentarios",
+    orientation="h",
+    text="quantidade_comentarios",
+    color_discrete_sequence=[COR_PRINCIPAL]
+)
+
+# 🔹 Comentários por proposta
+st.subheader("Comentários por eixo")
+
+fig1 = px.bar(
+    df_propostas.sort_values('quantidade_comentarios').tail(10),
+    y="categoria/id",
     x="quantidade_comentarios",
     orientation="h",
     text="quantidade_comentarios",
@@ -197,8 +209,8 @@ fig2 = px.line(
 fig2.update_traces(textposition="top center")
 st.plotly_chart(fig2, use_container_width=True)
 
-# 🔹 Votos por parágrafo
-st.subheader("Votos por parágrafo")
+# 🔹 Votos por proposta
+st.subheader("Votos por proposta")
 
 fig1 = px.bar(
     df_propostas.sort_values('quantidade_votos').tail(10),
@@ -216,7 +228,7 @@ st.plotly_chart(fig1, use_container_width=True)
 
 st.subheader("Votos por eixo")
 
-votos_eixo = df_propostas.groupby('categoria/nome/pt-BR')['quantidade_votos'].sum().reset_index()
+votos_eixo = df_propostas.groupby('categoria/id')['quantidade_votos'].sum().reset_index()
 fig1 = px.bar(
     votos_eixo.sort_values('quantidade_votos').tail(10),
     y="categoria/nome/pt-BR",
