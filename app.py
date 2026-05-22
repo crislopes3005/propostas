@@ -176,12 +176,14 @@ fig1 = px.bar(
     text="quantidade_comentarios",
     color_discrete_sequence=[COR_PRINCIPAL]
 )
+fig1.update_traces(textposition="outside")
+st.plotly_chart(fig1, use_container_width=True)
 
-# 🔹 Comentários por proposta
+# 🔹 Comentários por eixo
 st.subheader("Comentários por eixo")
-
+comentarios_eixo = df_propostas.groupby('categoria/id')['quantidade_comentarios'].sum().reset_index()
 fig1 = px.bar(
-    df_propostas.sort_values('quantidade_comentarios').tail(10),
+    comentarios_eixo.sort_values('quantidade_comentarios').tail(10),
     y="categoria/id",
     x="quantidade_comentarios",
     orientation="h",
