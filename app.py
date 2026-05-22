@@ -22,11 +22,31 @@ arquivo_upload = st.sidebar.file_uploader(
 )
 
 if arquivo_upload:
-    df_comentarios = pd.read_excel(arquivo_upload, sheet_name='comentarios')
-    df_propostas = pd.read_excel(arquivo_upload, sheet_name='propostas')
-    df_pordia = pd.read_excel(arquivo_upload, sheet_name='pordia')
-    df_paisestado = pd.read_excel(arquivo_upload, sheet_name='paisestado')
-    df_dispositivo = pd.read_excel(arquivo_upload, sheet_name='dispositivo')
+    df_comentarios = pd.read_excel(
+        arquivo_upload,
+        sheet_name='comentarios'
+    )
+
+    df_propostas = pd.read_excel(
+        arquivo_upload,
+        sheet_name='propostas'
+    )
+
+    df_pordia = pd.read_excel(
+        arquivo_upload,
+        sheet_name='pordia'
+    )
+
+    df_paisestado = pd.read_excel(
+        arquivo_upload,
+        sheet_name='paisestado'
+    )
+
+    df_dispositivo = pd.read_excel(
+        arquivo_upload,
+        sheet_name='dispositivo'
+    )
+
 else:
     st.warning("Envie um arquivo para continuar")
     st.stop()
@@ -35,43 +55,79 @@ else:
 # TRATAMENTOS
 # =========================
 
-# Datas
+# Datas comentários
 df_comentarios['data_publicacao'] = pd.to_datetime(
     df_comentarios['data_publicacao'],
-    format='%d/%m/%Y %H:%M',
+    dayfirst=True,
     errors='coerce'
 )
 
-df_comentarios['data'] = df_comentarios['data_publicacao'].dt.date
-df_pordia['Date'] = pd.to_datetime(df_pordia['Date'], dayfirst=True)
+df_comentarios['data'] = (
+    df_comentarios['data_publicacao']
+    .dt.date
+)
 
-# Datas - proposta
+# Datas propostas
 df_propostas['data_publicacao'] = pd.to_datetime(
     df_propostas['data_publicacao'],
-    format='%d/%m/%Y %H:%M',
+    dayfirst=True,
     errors='coerce'
 )
 
-df_propostas['data'] = df_propostas['data_publicacao'].dt.date
-
-
-# Descrição curta
-df_propostas['descricao_curta'] = df_propostas['descricao'].apply(
-    lambda x: (
-        lambda cleaned: cleaned[:60] + "..." if len(cleaned) > 60 else cleaned
-    )(' '.join(x.split()) if isinstance(x, str) else x)
-    if isinstance(x, str) else x
+df_propostas['data'] = (
+    df_propostas['data_publicacao']
+    .dt.date
 )
 
-# Estados
-df_paisestado['Region'] = df_paisestado['Region'].str.title()
+# Datas analytics
+df_pordia['Date'] = pd.to_datetime(
+    df_pordia['Date'],
+    dayfirst=True,
+    errors='coerce'
+)
 
-# Duração (limpeza)
+# Conversão numérica
+df_propostas['quantidade_votos'] = pd.to_numeric(
+    df_propostas['quantidade_votos'],
+    errors='coerce'
+)
+
+df_propostas['quantidade_comentarios'] = pd.to_numeric(
+    df_propostas['quantidade_comentarios'],
+    errors='coerce'
+)
+
 df_pordia['Avg Session Duration (Sec)'] = pd.to_numeric(
     df_pordia['Avg Session Duration (Sec)'],
     errors='coerce'
 )
 
+# Descrição curta
+df_propostas['descricao_curta'] = (
+    df_propostas['descricao']
+    .apply(
+        lambda x: (
+            lambda cleaned:
+            cleaned[:60] + "..."
+            if len(cleaned) > 60
+            else cleaned
+        )(
+            ' '.join(x.split())
+            if isinstance(x, str)
+            else x
+        )
+        if isinstance(x, str)
+        else x
+    )
+)
+
+# Estado formatado
+df_paisestado['Region'] = (
+    df_paisestado['Region']
+    .str.title()
+)
+
+# Limpeza duração
 df_duracao = df_pordia[
     (df_pordia['Avg Session Duration (Sec)'] > 0) &
     (df_pordia['Avg Session Duration (Sec)'] < 3600)
@@ -83,89 +139,179 @@ df_duracao = df_pordia[
 st.divider()
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Propostas", df_propostas['id_proposta'].nunique())
-col2.metric("Proponentes distintos", df_comentarios['autor/id'].nunique())
-col3.metric("Votos", df_propostas['quantidade_votos'].sum())
-col4.metric("Comentários", df_comentarios['id'].count())
+
+col1.metric(
+    "Propostas",
+    df_propostas['id_proposta'].nunique()
+)
+
+col2.metric(
+    "Proponentes distintos",
+    df_comentarios['autor/id'].nunique()
+)
+
+col3.metric(
+    "Votos",
+    int(df_propostas['quantidade_votos'].sum())
+)
+
+col4.metric(
+    "Comentários",
+    df_comentarios['id'].count()
+)
 
 st.divider()
 
 col5, col6, col7, col8, col9 = st.columns(5)
 
-col5.metric("Visitantes únicos", df_pordia['Users'].sum())
-col6.metric("Visualizações", df_pordia['Views'].sum())
-col7.metric("Taxa de rejeição", f"{df_pordia['Bounce Rate'].mean():.2%}")
+col5.metric(
+    "Visitantes únicos",
+    int(df_pordia['Users'].sum())
+)
 
-avg_sec = df_duracao['Avg Session Duration (Sec)'].median()
-col8.metric("Duração média", f"{int(avg_sec//60)}m {int(avg_sec%60)}s")
+col6.metric(
+    "Visualizações",
+    int(df_pordia['Views'].sum())
+)
 
-col9.metric("Países distintos", df_paisestado['Country'].nunique())
+col7.metric(
+    "Taxa de rejeição",
+    f"{df_pordia['Bounce Rate'].mean():.2%}"
+)
+
+avg_sec = (
+    df_duracao['Avg Session Duration (Sec)']
+    .median()
+)
+
+col8.metric(
+    "Duração média",
+    f"{int(avg_sec//60)}m {int(avg_sec%60)}s"
+)
+
+col9.metric(
+    "Países distintos",
+    df_paisestado['Country'].nunique()
+)
 
 st.divider()
 
 # =========================
-# KPIs DE PARTICIPAÇÃO NAS PROPOSTAS - COMENTÁRIOS
+# KPIs COMENTÁRIOS
 # =========================
-st.subheader("Distribuição de participação nas propostas - comentários")
+st.subheader(
+    "Distribuição de participação nas propostas - comentários"
+)
 
-total_paragrafos = len(df_propostas)
+total = len(df_propostas)
 
-sem_comentario = (df_propostas['quantidade_comentarios'] == 0).sum()
+sem_comentario = (
+    df_propostas['quantidade_comentarios'] == 0
+).sum()
 
 ate_5 = (
     (df_propostas['quantidade_comentarios'] >= 1) &
     (df_propostas['quantidade_comentarios'] <= 5)
 ).sum()
 
-mais_de_5 = (df_propostas['quantidade_comentarios'] > 5).sum()
+mais_de_5 = (
+    df_propostas['quantidade_comentarios'] > 5
+).sum()
 
-total = len(df_propostas)
-
-pct_sem = sem_comentario / total
-pct_ate5 = ate_5 / total
-pct_mais5 = mais_de_5 / total
+pct_sem = sem_comentario / total if total > 0 else 0
+pct_ate5 = ate_5 / total if total > 0 else 0
+pct_mais5 = mais_de_5 / total if total > 0 else 0
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Sem comentários", f"{pct_sem:.0%}")
-col2.metric("1 a 5 comentários", f"{pct_ate5:.0%}")
-col3.metric("Mais de 5 comentários", f"{pct_mais5:.0%}")
+col1.metric(
+    "Sem comentários",
+    f"{pct_sem:.0%}"
+)
+
+col2.metric(
+    "1 a 5 comentários",
+    f"{pct_ate5:.0%}"
+)
+
+col3.metric(
+    "Mais de 5 comentários",
+    f"{pct_mais5:.0%}"
+)
 
 st.divider()
 
 # =========================
-# KPIs DE PARTICIPAÇÃO NAS PROPOSTAS - VOTOS
+# KPIs VOTOS
 # =========================
-st.subheader("Distribuição de participação nas propostas - votos")
+st.subheader(
+    "Distribuição de participação nas propostas - votos"
+)
 
-total_propostas = len(df_propostas)
-
-sem_votos = (df_propostas['quantidade_votos'] == 0).sum()
+sem_votos = (
+    df_propostas['quantidade_votos'] == 0
+).sum()
 
 ate_100 = (
     (df_propostas['quantidade_votos'] >= 1) &
     (df_propostas['quantidade_votos'] <= 100)
 ).sum()
 
-mais_de_100 = (df_propostas['quantidade_votos'] > 100).sum()
+mais_de_100 = (
+    df_propostas['quantidade_votos'] > 100
+).sum()
 
-total = len(df_propostas)
-
-pct_sem = sem_votos / total
-pct_ate100 = ate_100 / total
-pct_mais100 = mais_de_100 / total
+pct_sem = sem_votos / total if total > 0 else 0
+pct_ate100 = ate_100 / total if total > 0 else 0
+pct_mais100 = mais_de_100 / total if total > 0 else 0
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Sem votos", f"{pct_sem:.0%}")
-col2.metric("1 a 100 votos", f"{pct_ate100:.0%}")
-col3.metric("Mais de 100 votos", f"{pct_mais100:.0%}")
+col1.metric(
+    "Sem votos",
+    f"{pct_sem:.0%}"
+)
+
+col2.metric(
+    "1 a 100 votos",
+    f"{pct_ate100:.0%}"
+)
+
+col3.metric(
+    "Mais de 100 votos",
+    f"{pct_mais100:.0%}"
+)
+
+# =========================
+# FUNÇÃO PADRÃO BARRAS
+# =========================
+def estilizar_barra(fig):
+
+    fig.update_traces(
+        textposition="outside"
+    )
+
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        plot_bgcolor="white"
+    )
+
+    fig.update_xaxes(
+        showgrid=False
+    )
+
+    fig.update_yaxes(
+        showgrid=False
+    )
+
+    return fig
 
 # =========================
 # GRÁFICOS
 # =========================
 
-# 🔹 propostas por eixo
+# 🔹 Propostas por eixo
 st.subheader("Propostas por eixo")
 
 propostas_eixo = (
@@ -176,7 +322,9 @@ propostas_eixo = (
 )
 
 fig1 = px.bar(
-    propostas_eixo.sort_values('quantidade_propostas').tail(10),
+    propostas_eixo
+    .sort_values('quantidade_propostas')
+    .tail(10),
     y="categoria/id",
     x="quantidade_propostas",
     orientation="h",
@@ -184,29 +332,44 @@ fig1 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig1.update_traces(textposition="outside")
-
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(
+    estilizar_barra(fig1),
+    use_container_width=True
+)
 
 # 🔹 Comentários por proposta
 st.subheader("Comentários por proposta")
 
-fig1 = px.bar(
-    df_propostas.sort_values('quantidade_comentarios').tail(10),
+fig2 = px.bar(
+    df_propostas
+    .sort_values('quantidade_comentarios')
+    .tail(10),
     y="titulo",
     x="quantidade_comentarios",
     orientation="h",
     text="quantidade_comentarios",
     color_discrete_sequence=[COR_PRINCIPAL]
 )
-fig1.update_traces(textposition="outside")
-st.plotly_chart(fig1, use_container_width=True)
+
+st.plotly_chart(
+    estilizar_barra(fig2),
+    use_container_width=True
+)
 
 # 🔹 Comentários por eixo
 st.subheader("Comentários por eixo")
-comentarios_eixo = df_propostas.groupby('categoria/id')['quantidade_comentarios'].sum().reset_index()
-fig1 = px.bar(
-    comentarios_eixo.sort_values('quantidade_comentarios').tail(10),
+
+comentarios_eixo = (
+    df_propostas
+    .groupby('categoria/id')['quantidade_comentarios']
+    .sum()
+    .reset_index()
+)
+
+fig3 = px.bar(
+    comentarios_eixo
+    .sort_values('quantidade_comentarios')
+    .tail(10),
     y="categoria/id",
     x="quantidade_comentarios",
     orientation="h",
@@ -214,15 +377,22 @@ fig1 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig1.update_traces(textposition="outside")
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(
+    estilizar_barra(fig3),
+    use_container_width=True
+)
 
 # 🔹 Comentários por dia
 st.subheader("Comentários por dia")
 
-comentarios_dia = df_comentarios.groupby('data')['id'].count().reset_index()
+comentarios_dia = (
+    df_comentarios
+    .groupby('data')['id']
+    .count()
+    .reset_index()
+)
 
-fig2 = px.line(
+fig4 = px.line(
     comentarios_dia.sort_values('data'),
     x='data',
     y='id',
@@ -231,14 +401,22 @@ fig2 = px.line(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig2.update_traces(textposition="top center")
-st.plotly_chart(fig2, use_container_width=True)
+fig4.update_traces(
+    textposition="top center"
+)
+
+st.plotly_chart(
+    fig4,
+    use_container_width=True
+)
 
 # 🔹 Votos por proposta
 st.subheader("Votos por proposta")
 
-fig3 = px.bar(
-    df_propostas.sort_values('quantidade_votos').tail(10),
+fig5 = px.bar(
+    df_propostas
+    .sort_values('quantidade_votos')
+    .tail(10),
     y="titulo",
     x="quantidade_votos",
     orientation="h",
@@ -246,17 +424,25 @@ fig3 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig3.update_traces(textposition="outside")
-st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(
+    estilizar_barra(fig5),
+    use_container_width=True
+)
 
 # 🔹 Votos por eixo
-
 st.subheader("Votos por eixo")
 
-votos_eixo = df_propostas.groupby('categoria/id')['quantidade_votos'].sum().reset_index()
+votos_eixo = (
+    df_propostas
+    .groupby('categoria/id')['quantidade_votos']
+    .sum()
+    .reset_index()
+)
 
-fig4 = px.bar(
-    votos_eixo.sort_values('quantidade_votos').tail(10),
+fig6 = px.bar(
+    votos_eixo
+    .sort_values('quantidade_votos')
+    .tail(10),
     y="categoria/id",
     x="quantidade_votos",
     orientation="h",
@@ -264,15 +450,22 @@ fig4 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig4.update_traces(textposition="outside")
-st.plotly_chart(fig4, use_container_width=True)
+st.plotly_chart(
+    estilizar_barra(fig6),
+    use_container_width=True
+)
 
 # 🔹 Propostas por dia
 st.subheader("Propostas por dia")
 
-propostas_dia = df_propostas.groupby('data')['id_proposta'].count().reset_index()
+propostas_dia = (
+    df_propostas
+    .groupby('data')['id_proposta']
+    .count()
+    .reset_index()
+)
 
-fig2 = px.line(
+fig7 = px.line(
     propostas_dia.sort_values('data'),
     x='data',
     y='id_proposta',
@@ -281,17 +474,27 @@ fig2 = px.line(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig2.update_traces(textposition="top center")
-st.plotly_chart(fig2, use_container_width=True)
+fig7.update_traces(
+    textposition="top center"
+)
 
-# 🔹 Visitantes e visualizações por dia
+st.plotly_chart(
+    fig7,
+    use_container_width=True
+)
+
+# 🔹 Visitantes e visualizações
 st.subheader("Visitantes e visualizações por dia")
 
-df_agg = df_pordia.groupby('Date', as_index=False)[['Users', 'Views']].sum()
+df_agg = (
+    df_pordia
+    .groupby('Date', as_index=False)[['Users', 'Views']]
+    .sum()
+)
+
 df_agg = df_agg.sort_values('Date')
 
-# 🔹 Visitantes (base)
-fig3 = px.line(
+fig8 = px.line(
     df_agg,
     x='Date',
     y='Users',
@@ -299,46 +502,60 @@ fig3 = px.line(
     color_discrete_sequence=["#5A7BBF"]
 )
 
-# 🔥 GARANTIR legenda correta
-fig3.data[0].name = "Visitantes"
-fig3.data[0].showlegend = True
+fig8.data[0].name = "Visitantes"
 
-# 🔹 Visualizações (com rótulo)
-fig3.add_scatter(
+fig8.add_scatter(
     x=df_agg['Date'],
     y=df_agg['Views'],
     mode='lines+markers+text',
     name='Visualizações',
     text=df_agg['Views'],
     textposition='top center',
-    line=dict(color=COR_PRINCIPAL, width=3),
-    showlegend=True
+    line=dict(
+        color=COR_PRINCIPAL,
+        width=3
+    )
 )
 
-# 🔹 Layout
-fig3.update_layout(
+fig8.update_layout(
     xaxis_title="Data",
     yaxis_title="Quantidade",
     hovermode="x unified",
     legend=dict(
-        orientation="h",   # horizontal
+        orientation="h",
         yanchor="top",
-        y=-0.2,            # posição abaixo do gráfico
+        y=-0.2,
         xanchor="center",
-        x=0.5              # centralizado
+        x=0.5
     )
 )
 
-st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(
+    fig8,
+    use_container_width=True
+)
 
 # 🔹 Top 10 estados
 st.subheader("Top 10 estados com mais visitas")
 
-df_estados = df_paisestado[df_paisestado['Country'].str.lower() == 'brazil']
-df_estados = df_estados.groupby('Region')['Sessions'].sum().reset_index()
-df_estados = df_estados.sort_values('Sessions', ascending=True).tail(10)
+df_estados = df_paisestado[
+    df_paisestado['Country'].str.lower() == 'brazil'
+]
 
-fig4 = px.bar(
+df_estados = (
+    df_estados
+    .groupby('Region')['Sessions']
+    .sum()
+    .reset_index()
+)
+
+df_estados = (
+    df_estados
+    .sort_values('Sessions', ascending=True)
+    .tail(10)
+)
+
+fig9 = px.bar(
     df_estados,
     x='Sessions',
     y='Region',
@@ -347,44 +564,85 @@ fig4 = px.bar(
     color_discrete_sequence=[COR_PRINCIPAL]
 )
 
-fig4.update_traces(textposition="outside")
-st.plotly_chart(fig4, use_container_width=True)
+st.plotly_chart(
+    estilizar_barra(fig9),
+    use_container_width=True
+)
 
 # 🔹 Dispositivos
 st.subheader("Acesso por dispositivo")
 
-fig5 = px.pie(
+fig10 = px.pie(
     df_dispositivo,
     names='Device Type',
     values='Sessions',
-    color_discrete_sequence=[COR_PRINCIPAL, "#5A7BBF", "#A5B8E1"]
+    color_discrete_sequence=[
+        COR_PRINCIPAL,
+        "#5A7BBF",
+        "#A5B8E1"
+    ]
 )
 
-fig5.update_traces(textinfo='percent+label')
-st.plotly_chart(fig5, use_container_width=True)
+fig10.update_traces(
+    textinfo='percent+label'
+)
+
+st.plotly_chart(
+    fig10,
+    use_container_width=True
+)
 
 # =========================
 # TABELA FINAL
 # =========================
 st.subheader("Detalhamento das propostas")
 
-df_tabela = df_propostas[['titulo', 'categoria/id', 'categoria/nome/pt-BR', 'quantidade_comentarios', 'quantidade_votos', 'url_proposta']].copy()
-df_tabela = df_tabela.sort_values('quantidade_votos', ascending=False).head(20)
+df_tabela = df_propostas[
+    [
+        'titulo',
+        'categoria/id',
+        'categoria/nome/pt-BR',
+        'quantidade_comentarios',
+        'quantidade_votos',
+        'url_proposta'
+    ]
+].copy()
+
+df_tabela = (
+    df_tabela
+    .sort_values('quantidade_votos', ascending=False)
+    .head(20)
+)
 
 df_tabela['🔗'] = df_tabela['url_proposta'].apply(
-    lambda x: f'<a href="{x}" target="_blank">🔗</a>'
+    lambda x:
+    f'<a href="{x}" target="_blank">🔗</a>'
 )
 
 st.markdown(
-    df_tabela[['titulo', 'categoria/id','categoria/nome/pt-BR','quantidade_comentarios', 'quantidade_votos' ,'🔗']]
-    .rename(columns={
-        'titulo': 'Proposta',
-        'categoria/id': 'Eixo',
-        'categoria/nome/pt-BR': 'Etapa',
-        'quantidade_comentarios': 'Comentários',
-        'quantidade_votos':'Votos'
-    })
-    .to_html(escape=False, index=False),
+    df_tabela[
+        [
+            'titulo',
+            'categoria/id',
+            'categoria/nome/pt-BR',
+            'quantidade_comentarios',
+            'quantidade_votos',
+            '🔗'
+        ]
+    ]
+    .rename(
+        columns={
+            'titulo': 'Proposta',
+            'categoria/id': 'Eixo',
+            'categoria/nome/pt-BR': 'Etapa',
+            'quantidade_comentarios': 'Comentários',
+            'quantidade_votos': 'Votos'
+        }
+    )
+    .to_html(
+        escape=False,
+        index=False
+    ),
     unsafe_allow_html=True
 )
 
