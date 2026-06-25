@@ -511,7 +511,7 @@ fig8.add_scatter(
     mode='lines+markers+text',
     name='Visualizações',
     text=[
-        str(v) if i % 7 == 0 else ""
+        str(v) if i % 3 == 0 else ""
         for i, v in enumerate(df_agg['Views'])
     ],
     textposition='top center',
