@@ -494,7 +494,6 @@ df_agg = (
 
 df_agg = df_agg.sort_values('Date')
 
-# CRIA O GRÁFICO PRIMEIRO
 fig8 = px.line(
     df_agg,
     x='Date',
@@ -505,25 +504,21 @@ fig8 = px.line(
 
 fig8.data[0].name = "Visitantes"
 
-# DEPOIS ADICIONA A SEGUNDA LINHA
+# Linha de visualizações com rótulos reduzidos
 fig8.add_scatter(
     x=df_agg['Date'],
     y=df_agg['Views'],
     mode='lines+markers+text',
     name='Visualizações',
-    text=df_agg['Views'],
+    text=[
+        str(v) if i % 7 == 0 else ""
+        for i, v in enumerate(df_agg['Views'])
+    ],
     textposition='top center',
     line=dict(
         color=COR_PRINCIPAL,
         width=3
     )
-)
-
-# REDUZ OS RÓTULOS DO EIXO X
-fig8.update_xaxes(
-    nticks=10,
-    tickangle=-45,
-    tickformat="%d/%m"
 )
 
 fig8.update_layout(
