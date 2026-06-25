@@ -705,7 +705,9 @@ wordcloud = WordCloud(
 fig, ax = plt.subplots()
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis("off")
+st.pyplot(fig)
 
+st.pyplot(fig)
 # =========================
 # NUVEM DE PALAVRAS
 # =========================
