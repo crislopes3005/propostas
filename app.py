@@ -483,6 +483,29 @@ st.plotly_chart(
     use_container_width=True
 )
 
+# 🔹 Visitantes e visualizações
+st.subheader("Visitantes e visualizações por dia")
+
+df_agg = (
+    df_pordia
+    .groupby('Date', as_index=False)[['Users', 'Views']]
+    .sum()
+)
+
+df_agg = df_agg.sort_values('Date')
+
+# CRIA O GRÁFICO PRIMEIRO
+fig8 = px.line(
+    df_agg,
+    x='Date',
+    y='Users',
+    markers=True,
+    color_discrete_sequence=["#5A7BBF"]
+)
+
+fig8.data[0].name = "Visitantes"
+
+# DEPOIS ADICIONA A SEGUNDA LINHA
 fig8.add_scatter(
     x=df_agg['Date'],
     y=df_agg['Views'],
@@ -496,7 +519,7 @@ fig8.add_scatter(
     )
 )
 
-# Reduz quantidade de datas exibidas
+# REDUZ OS RÓTULOS DO EIXO X
 fig8.update_xaxes(
     nticks=10,
     tickangle=-45,
